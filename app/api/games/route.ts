@@ -7,7 +7,7 @@ export async function GET() {
   const rows = db
     .prepare(`SELECT * FROM games ORDER BY created_at DESC`)
     .all() as GameRow[];
-  const games = rows.map((r) => ({ ...r, is_new: isNewGame(r.created_at) }));
+  const games = rows.map((r) => ({ ...r, is_new: isNewGame(r) }));
   return NextResponse.json({ games });
 }
 

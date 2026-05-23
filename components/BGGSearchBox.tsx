@@ -48,6 +48,7 @@ export function BGGSearchBox({
         onChange={(e) => handleInput(e.target.value)}
         onFocus={() => hits.length > 0 && setOpen(true)}
         placeholder="Search BoardGameGeek (e.g. Wingspan)"
+        autoComplete="off"
         className="w-full px-4 py-3 rounded-2xl border-2 border-cocoa bg-white text-lg shadow-[4px_4px_0_0_var(--cocoa)] focus:outline-none focus:ring-4 focus:ring-lavender/50"
       />
       {loading && (

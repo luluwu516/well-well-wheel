@@ -26,6 +26,13 @@ function open(): Database.Database {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  // Migration: optional dismissal flag for the auto-derived NEW badge.
+  // ALTER fails the second time around; swallow the duplicate-column error.
+  try {
+    conn.exec(`ALTER TABLE games ADD COLUMN new_dismissed INTEGER NOT NULL DEFAULT 0`);
+  } catch (e) {
+    if (!(e as Error).message.includes("duplicate column")) throw e;
+  }
   return conn;
 }
 
@@ -45,5 +52,6 @@ export type GameRow = {
   playing_time: number | null;
   weight: number | null;
   status: GameStatus;
+  new_dismissed: number; // 0 | 1, sqlite has no bool
   created_at: string;
 };

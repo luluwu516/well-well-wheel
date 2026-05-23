@@ -130,6 +130,7 @@ export default function AddPage() {
                 onChange={(e) => update("title", e.target.value)}
                 className={INPUT_CLASS}
                 placeholder="e.g. Wingspan"
+                autoComplete="off"
               />
             </Label>
             <Label text="Image URL">
@@ -138,6 +139,7 @@ export default function AddPage() {
                 onChange={(e) => update("imageUrl", e.target.value)}
                 className={INPUT_CLASS}
                 placeholder="https://…"
+                autoComplete="off"
               />
             </Label>
           </div>
@@ -151,6 +153,7 @@ export default function AddPage() {
               value={form.minPlayers}
               onChange={(e) => update("minPlayers", e.target.value)}
               className={INPUT_CLASS}
+              autoComplete="off"
             />
           </Label>
           <Label text="Max players">
@@ -160,6 +163,7 @@ export default function AddPage() {
               value={form.maxPlayers}
               onChange={(e) => update("maxPlayers", e.target.value)}
               className={INPUT_CLASS}
+              autoComplete="off"
             />
           </Label>
           <Label text="Time (min)">
@@ -169,6 +173,7 @@ export default function AddPage() {
               value={form.playingTime}
               onChange={(e) => update("playingTime", e.target.value)}
               className={INPUT_CLASS}
+              autoComplete="off"
             />
           </Label>
           <Label text="BGG weight">
@@ -180,6 +185,7 @@ export default function AddPage() {
               value={form.weight}
               onChange={(e) => update("weight", e.target.value)}
               className={INPUT_CLASS}
+              autoComplete="off"
             />
           </Label>
         </div>

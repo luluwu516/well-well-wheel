@@ -6,13 +6,19 @@ const parser = new XMLParser({
   isArray: (name) => ["item", "name", "link"].includes(name),
 });
 
-// TODO: BGG started gating xmlapi2 behind auth in late 2025. Migrate to the
-// authenticated API2 (with the new /thing endpoint) once credentials arrive.
+// BGG gates xmlapi2 behind auth since late 2025. Requests carry the API2
+// token as a Bearer header; the base URL is unchanged.
 const BGG = "https://boardgamegeek.com/xmlapi2";
+
+function authHeaders(): Record<string, string> {
+  const token = process.env.BGG_API_TOKEN;
+  if (!token) throw new Error("BGG_API_TOKEN is not set");
+  return { Accept: "application/xml", Authorization: `Bearer ${token}` };
+}
 
 async function fetchXml(url: string, retries = 3): Promise<string> {
   for (let i = 0; i < retries; i++) {
-    const res = await fetch(url, { headers: { Accept: "application/xml" } });
+    const res = await fetch(url, { headers: authHeaders() });
     if (res.status === 202) {
       await new Promise((r) => setTimeout(r, 1000));
       continue;
@@ -30,16 +36,49 @@ export type BggSearchHit = {
 };
 
 export async function searchGames(query: string): Promise<BggSearchHit[]> {
-  if (!query.trim()) return [];
-  const url = `${BGG}/search?query=${encodeURIComponent(query)}&type=boardgame`;
+  const q = query.trim();
+  if (!q) return [];
+  const url = `${BGG}/search?query=${encodeURIComponent(q)}&type=boardgame`;
   const xml = await fetchXml(url);
   const json = parser.parse(xml);
   const items = json?.items?.item ?? [];
-  return items.slice(0, 20).map((it: BggItem) => ({
+  const hits: BggSearchHit[] = items.map((it: BggItem) => ({
     id: Number(it["@_id"]),
     title: pickPrimaryName(it.name) ?? "(unknown)",
     year: it.yearpublished?.["@_value"] ? Number(it.yearpublished["@_value"]) : null,
   }));
+  // BGG sorts by internal popularity; re-rank so prefix and word-prefix matches
+  // float to the top. e.g. "secret hi" → "Secret Hitler" beats
+  // "Boss Monster: Hidden Secret".
+  return hits.sort((a, b) => relevance(b.title, q) - relevance(a.title, q)).slice(0, 20);
+}
+
+function relevance(title: string, query: string): number {
+  const t = title.toLowerCase();
+  const q = query.toLowerCase();
+  if (t === q) return 10000;
+  if (t.startsWith(q)) return 5000 - t.length;
+  const tokens = q.split(/\s+/).filter(Boolean);
+  const words = t.split(/[\s:,\-–—]+/).filter(Boolean);
+  let wordPrefixHits = 0;
+  let containsHits = 0;
+  let positionPenalty = 0;
+  for (const tk of tokens) {
+    const wi = words.findIndex((w) => w.startsWith(tk));
+    if (wi >= 0) {
+      wordPrefixHits++;
+      positionPenalty += wi;
+      continue;
+    }
+    const si = t.indexOf(tk);
+    if (si >= 0) {
+      containsHits++;
+      positionPenalty += 20 + si;
+    } else {
+      return -1000; // missing token = irrelevant
+    }
+  }
+  return 2000 + wordPrefixHits * 300 + containsHits * 50 - positionPenalty * 8 - t.length;
 }
 
 export type BggGameDetail = {

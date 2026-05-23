@@ -9,6 +9,7 @@ type PatchBody = Partial<{
   playing_time: number | null;
   weight: number | null;
   status: GameStatus;
+  new_dismissed: boolean;
 }>;
 
 const ALLOWED_STATUS: GameStatus[] = ["normal", "want_to_play"];
@@ -54,6 +55,10 @@ export async function PATCH(
   if (body.status && ALLOWED_STATUS.includes(body.status)) {
     fields.push("status = ?");
     values.push(body.status);
+  }
+  if (typeof body.new_dismissed === "boolean") {
+    fields.push("new_dismissed = ?");
+    values.push(body.new_dismissed ? 1 : 0);
   }
   if (fields.length === 0) {
     return NextResponse.json({ error: "no fields to update" }, { status: 400 });

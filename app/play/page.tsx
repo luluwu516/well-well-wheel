@@ -260,18 +260,18 @@ function SelectView({
               <button
                 type="button"
                 onClick={() => toggle(g)}
-                className="relative aspect-square bg-cream"
+                className="relative block w-full aspect-square bg-cream overflow-hidden"
               >
                 <GameCover
                   src={g.image_url}
                   alt={g.title}
-                  className="w-full h-full"
+                  className="absolute inset-0 w-full h-full"
                 />
-                <div className="absolute top-2 left-2 flex gap-1">
+                <div className="absolute top-2 left-2 flex gap-1 z-10">
                   <StatusBadge game={g} />
                 </div>
                 {selected && (
-                  <div className="absolute top-2 right-2 bg-tangerine border-2 border-cocoa rounded-full w-9 h-9 flex items-center justify-center text-lg font-bold">
+                  <div className="absolute top-2 right-2 z-10 bg-tangerine border-2 border-cocoa rounded-full w-9 h-9 flex items-center justify-center text-lg font-bold">
                     ✓
                   </div>
                 )}
@@ -293,7 +293,7 @@ function SelectView({
           );
         })}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-paper/95 backdrop-blur border-t-2 border-cocoa p-4 flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-paper/95 backdrop-blur border-t-2 border-cocoa p-4 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={onBack}

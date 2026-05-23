@@ -15,17 +15,16 @@ export function GameCard({ game, onChange, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  async function toggleStatus() {
+  async function dismissNew() {
     setBusy(true);
-    const nextStatus = game.status === "want_to_play" ? "normal" : "want_to_play";
     const res = await fetch(`/api/games/${game.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: nextStatus }),
+      body: JSON.stringify({ new_dismissed: true }),
     });
     if (res.ok) {
       const { game: updated } = await res.json();
-      onChange({ ...updated, is_new: game.is_new });
+      onChange({ ...updated, is_new: false });
     }
     setBusy(false);
   }
@@ -47,7 +46,7 @@ export function GameCard({ game, onChange, onDelete }: Props) {
           className="absolute inset-0 w-full h-full"
         />
         <div className="absolute top-2 left-2 flex gap-1 z-10">
-          <StatusBadge game={game} />
+          <StatusBadge game={game} onDismissNew={dismissNew} />
         </div>
       </div>
       <div className="p-3 flex flex-col gap-2 flex-1">
@@ -58,14 +57,6 @@ export function GameCard({ game, onChange, onDelete }: Props) {
           {game.weight != null && <span>🧠 {game.weight.toFixed(1)}</span>}
         </div>
         <div className="flex gap-1 mt-auto flex-wrap">
-          <button
-            type="button"
-            onClick={toggleStatus}
-            disabled={busy}
-            className="text-xs btn-sticker active:btn-sticker-active px-3 py-1 bg-lavender"
-          >
-            {game.status === "want_to_play" ? "Unwant" : "Want to play"}
-          </button>
           <button
             type="button"
             onClick={() => setEditing((v) => !v)}
@@ -144,6 +135,7 @@ function EditForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className={inputClass}
+          autoComplete="off"
         />
       </label>
       <label className="flex flex-col gap-1">
@@ -153,6 +145,7 @@ function EditForm({
           onChange={(e) => setImageUrl(e.target.value)}
           placeholder="https://…"
           className={inputClass}
+          autoComplete="off"
         />
       </label>
       <div className="grid grid-cols-2 gap-2">
@@ -164,6 +157,7 @@ function EditForm({
             value={minP}
             onChange={(e) => setMinP(Number(e.target.value))}
             className={inputClass}
+            autoComplete="off"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -174,6 +168,7 @@ function EditForm({
             value={maxP}
             onChange={(e) => setMaxP(Number(e.target.value))}
             className={inputClass}
+            autoComplete="off"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -184,6 +179,7 @@ function EditForm({
             value={time}
             onChange={(e) => setTime(Number(e.target.value))}
             className={inputClass}
+            autoComplete="off"
           />
         </label>
         <label className="flex flex-col gap-1">
@@ -196,6 +192,7 @@ function EditForm({
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             className={inputClass}
+            autoComplete="off"
           />
         </label>
       </div>

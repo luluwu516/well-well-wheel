@@ -2,13 +2,17 @@ import type { GameRow } from "./db";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-export function isNewGame(createdAt: string): boolean {
-  return Date.now() - new Date(createdAt).getTime() < THIRTY_DAYS_MS;
+export function isNewGame(
+  row: Pick<GameRow, "created_at" | "new_dismissed">,
+): boolean {
+  if (row.new_dismissed) return false;
+  return Date.now() - new Date(row.created_at).getTime() < THIRTY_DAYS_MS;
 }
 
-export function defaultWeightFor(game: Pick<GameRow, "status" | "created_at">): number {
-  if (isNewGame(game.created_at)) return 2;
-  if (game.status === "want_to_play") return 1.5;
+export function defaultWeightFor(
+  game: Pick<GameRow, "created_at" | "new_dismissed">,
+): number {
+  if (isNewGame(game)) return 2;
   return 1;
 }
 
